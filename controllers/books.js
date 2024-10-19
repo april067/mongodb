@@ -1,15 +1,17 @@
-const { booksServices } = require('../services');
+const { Book } = require('../models');
 const { HttpError } = require('../helpers');
 
 const getAllBooks = async (_, res) => {
-	const books = await booksServices.listBooks();
+	const books = await Book.find({});
+
 	res.json(books);
 };
 
 const getBook = async (req, res) => {
 	const { id } = req.params;
 
-	const book = await booksServices.getBookById(id);
+	// const book = await Book.findOne({_id: id})
+	const book = await Book.findById(id);
 	if (!book) {
 		throw HttpError(404, 'Not found');
 	}
@@ -18,8 +20,7 @@ const getBook = async (req, res) => {
 };
 
 const addBook = async (req, res) => {
-	const data = req.body;
-	const newBook = await booksServices.addBook(data);
+	const newBook = await Book.create(req.body);
 
 	res.status(201).json(newBook);
 };
@@ -30,7 +31,7 @@ const updateBook = async (req, res) => {
 	if (Object.keys(data).length === 0)
 		res.status(400).json({ message: 'Request body must have at least one field' });
 
-	const updatedBook = await booksServices.updateBookById(id, data);
+	const updatedBook = await Book.findByIdAndUpdate(id, data, { new: true });
 	if (!updatedBook) {
 		throw HttpError(404, 'Not found');
 	}
@@ -41,12 +42,26 @@ const updateBook = async (req, res) => {
 const removeBook = async (req, res) => {
 	const { id } = req.params;
 
-	const book = await booksServices.removeBook(id);
+	const book = await Book.findByIdAndDelete(id);
 	if (!book) {
 		throw HttpError(404, 'Not found');
 	}
 
-	res.json(book);
+	res.json({
+		message: 'Deletion successful',
+	});
+};
+
+const updateFavorite = async (req, res) => {
+	const { id } = req.params;
+	const data = req.body;
+
+	const updatedBook = await Book.findByIdAndUpdate(id, data, { new: true });
+	if (!updatedBook) {
+		throw HttpError(404, 'Not found');
+	}
+
+	res.json(updatedBook);
 };
 
 module.exports = {
@@ -55,4 +70,5 @@ module.exports = {
 	addBook,
 	updateBook,
 	removeBook,
+	updateFavorite,
 };

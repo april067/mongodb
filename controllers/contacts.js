@@ -48,7 +48,9 @@ const removeContact = async (req, res) => {
 		throw HttpError(404, 'Not found');
 	}
 
-	res.json(contact);
+	res.json({
+		message: 'Deletion successful',
+	});
 };
 
 const updateFavorite = async (req, res) => {
